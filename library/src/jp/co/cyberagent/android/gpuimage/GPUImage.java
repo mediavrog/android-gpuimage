@@ -177,6 +177,10 @@ public class GPUImage {
 		if(listener != null) listener.onLoad(this);
     }
 
+	public Bitmap getImage(){
+		return mCurrentBitmap;
+	}
+
 	public void setOnImageLoadedListener(OnImageLoadedListener listener){
 		this.listener = listener;
 	}
