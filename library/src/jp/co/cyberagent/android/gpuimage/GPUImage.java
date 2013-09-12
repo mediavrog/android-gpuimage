@@ -54,8 +54,6 @@ public class GPUImage {
     private Bitmap mCurrentBitmap;
     private ScaleType mScaleType = ScaleType.CENTER_CROP;
 
-	private OnImageLoadedListener listener;
-
     /**
      * Instantiates a new GPUImage object.
      *
@@ -174,15 +172,10 @@ public class GPUImage {
         mCurrentBitmap = bitmap;
         mRenderer.setImageBitmap(bitmap, false);
         requestRender();
-		if(listener != null) listener.onLoad(this);
     }
 
 	public Bitmap getImage(){
 		return mCurrentBitmap;
-	}
-
-	public void setOnImageLoadedListener(OnImageLoadedListener listener){
-		this.listener = listener;
 	}
 
     /**
@@ -414,14 +407,6 @@ public class GPUImage {
             return display.getHeight();
         }
     }
-
-	public int getImageWidth(){
-		return mCurrentBitmap != null ? mCurrentBitmap.getWidth() : 0;
-	}
-
-	public int getImageHeight(){
-		return mCurrentBitmap != null ? mCurrentBitmap.getHeight() : 0;
-	}
 
     @Deprecated
     private class SaveTask extends AsyncTask<Void, Void, Void> {

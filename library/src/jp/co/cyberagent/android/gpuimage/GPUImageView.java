@@ -206,15 +206,28 @@ public class GPUImageView extends FrameLayout {
         new SaveTask(folderName, fileName, width, height, listener).execute();
     }
 
+	/**
+	 * Retrieve current image with filter applied and given size as Bitmap.
+	 *
+	 * @param width  requested Bitmap width
+	 * @param height requested Bitmap height
+	 * @return Bitmap of picture with given size
+	 * @throws InterruptedException
+	 */
+	public Bitmap capture(final int width, final int height) throws InterruptedException {
+		return capture(width, height, true);
+	}
+
     /**
      * Retrieve current image with filter applied and given size as Bitmap.
      *
      * @param width  requested Bitmap width
      * @param height requested Bitmap height
+	 * @param showLoadingView show a loading indicator while processing
      * @return Bitmap of picture with given size
      * @throws InterruptedException
      */
-    public Bitmap capture(final int width, final int height) throws InterruptedException {
+    public Bitmap capture(final int width, final int height, final boolean showLoadingView) throws InterruptedException {
         // This method needs to run on a background thread because it will take a longer time
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new IllegalStateException("Do not call this method from the UI thread!");
@@ -240,12 +253,19 @@ public class GPUImageView extends FrameLayout {
             @Override
             public void run() {
                 // Show loading¥
-                addView(new LoadingView(getContext()));
+				if(showLoadingView) addView(new LoadingView(getContext()));
 
                 mGLSurfaceView.requestLayout();
             }
         });
         waiter.acquire();
+
+		// fix for timing condition on some devices (Galaxy S2), when upscaling the view
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
         // Run one render pass
         mGPUImage.runOnGLThread(new Runnable() {
@@ -268,13 +288,15 @@ public class GPUImageView extends FrameLayout {
         });
         requestRender();
 
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Remove loading view
-                removeViewAt(1);
-            }
-        }, 300);
+		if(showLoadingView) {
+			postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// Remove loading view
+					removeViewAt(1);
+				}
+			}, 300);
+		}
 
         return bitmap;
     }
